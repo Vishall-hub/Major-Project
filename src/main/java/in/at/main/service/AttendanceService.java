@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import in.at.main.dto.AttendanceSummaryDTO;
 import in.at.main.entity.EventAttendance;
 import in.at.main.entity.NormalAttendance;
 import in.at.main.entity.Status;
@@ -57,21 +58,41 @@ this.eventRepo = eventRepo;
                 Integer slotId = ea.getId().getSlotId();
                 LocalDate date = ea.getId().getAttendanceDate();
 
-                // find normal attendance of same slot/date
-                List<NormalAttendance> normalList = normalRepo.findAll();
-
-                for (NormalAttendance na : normalList) {
-
-                    if (na != null
-                            && na.getId().getRollNo().equals(rollNo)
-                            && na.getId().getSlotId().equals(slotId)
-                            && na.getId().getAttendanceDate().equals(date)) {
-
-                        na.setStatus(Status.PRESENT);
-                        normalRepo.save(na);
-                    }
-                }
+                normalRepo.updateAttendanceToPresent(rollNo, slotId, date);
             }
         }
     }
+    
+    // For Percentage of Attendance
+    public AttendanceSummaryDTO getOverallSummary(String rollNo) {
+
+        long total = normalRepo.totalClasses(rollNo);
+        long present = normalRepo.totalPresent(rollNo);
+        long absent = total - present;
+
+        double percentage = 0;
+        if (total > 0) {
+            percentage = (present * 100.0) / total;
+        }
+
+        return new AttendanceSummaryDTO(rollNo, total, present, absent, percentage);
+    }
+    
+    
+    public AttendanceSummaryDTO getOverallSummaryBySubject(String rollNo, Integer subjectId) {
+
+        long total = normalRepo.totalClassesOverall(rollNo,subjectId);
+        long present = normalRepo.totalPresentOverall(rollNo,subjectId);
+        long absent = total - present;
+
+        double percentage = 0;
+        if(total > 0) {
+            percentage = (present * 100.0) / total;
+        }
+
+        return new AttendanceSummaryDTO(rollNo, null, total, present, absent, percentage);
+    }
+
+
+
 }
