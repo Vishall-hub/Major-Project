@@ -1,5 +1,6 @@
 package in.at.main.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -37,14 +38,32 @@ public interface NormalAttendanceRepository extends JpaRepository<NormalAttendan
        
     
    
-    //OverAll Attendance
+    //OverAll Attendance by filters
     @Query("SELECT COUNT(n) FROM NormalAttendance n WHERE n.id.rollNo = :rollNo")
     long totalClasses(@Param("rollNo") String rollNo);
 
     @Query("SELECT COUNT(n) FROM NormalAttendance n WHERE n.id.rollNo = :rollNo AND n.status = 'PRESENT'")
     long totalPresent(@Param("rollNo") String rollNo);
 
+    
+    @Query("SELECT a FROM NormalAttendance a WHERE " +
+    	       "(:subjectId IS NULL OR a.id.subjectId = :subjectId) AND " +
+    	       "(:date IS NULL OR a.id.attendanceDate = :date)")
+    	List<NormalAttendance> searchNormal(
+    	        @Param("subjectId") Integer subjectId,
+    	        @Param("date") LocalDate date
+    	);
 
     	
-    	
+    	//for geting bracnch
+    @Query("SELECT a FROM NormalAttendance a JOIN Student s ON a.id.rollNo = s.rollNo WHERE " +
+    	       "(:branch IS NULL OR s.branch = :branch) AND " +
+    	       "(:subjectId IS NULL OR a.id.subjectId = :subjectId) AND " +
+    	       "(:date IS NULL OR a.id.attendanceDate = :date)")
+    	List<NormalAttendance> searchNormalWithBranch(
+    	        @Param("branch") String branch,
+    	        @Param("subjectId") Integer subjectId,
+    	        @Param("date") LocalDate date
+    	);
+
 }

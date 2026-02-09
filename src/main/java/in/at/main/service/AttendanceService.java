@@ -89,6 +89,8 @@ this.eventRepo = eventRepo;
         if(total > 0) {
             percentage = (present * 100.0) / total;
         }
+        
+        // subjectid se
 
         return new AttendanceSummaryDTO(rollNo, null, total, present, absent, percentage);
     }
